@@ -1,0 +1,417 @@
+#!/bin/bash
+
+# This script install Stable Diffusion on Apple Silicon M1 M1Pro CPU.
+
+# -- Variables you can change ---------------------------------------------------------------------
+# 1. URL to Github project and model
+LSTEIN_GITHUB_URL="https://github.com/lstein/stable-diffusion/archive/refs/heads/main.zip"
+LDM_MODEL_URL="https://www.googleapis.com/storage/v1/b/aai-blog-files/o/sd-v1-4.ckpt?alt=media"
+GFPGAN_GITHUB_URL="https://github.com/TencentARC/GFPGAN/archive/refs/heads/master.zip"
+GFPGAN_MODEL_URL="https://github.com/TencentARC/GFPGAN/releases/download/v1.3.0/GFPGANv1.3.pth"
+
+# 2. Path where projects will be installed
+# Per default:
+# project root folder will be in ~/stable-diffusion/
+SD_PATH="$HOME/stable-diffusion"
+
+# lstein/stable-diffusion will be in ~/stable-diffusion/lstein
+LSTEIN_FOLDER_NAME="stablediffusion"
+LSTEIN_PATH="$SD_PATH/$LSTEIN_FOLDER_NAME"
+LDM_PATH="$LSTEIN_PATH/models/ldm/stable-diffusion-v1"
+
+# GFPGAN will be in ~/stable-diffusion/lstein/GFPGAN
+GFPGAN_FOLDER_NAME="GFPGAN"
+GFPGAN_PATH="$LSTEIN_PATH/$GFPGAN_FOLDER_NAME"
+GFPGAN_MODEL_PATH="$GFPGAN_PATH/experiments/pretrained_models"
+
+CONDA_ENV="ldm"
+CONDA_ENV_BAK=$CONDA_ENV"_bak"
+
+# -- SCRIPT VERSION -------------------------------------------------------------------------------
+SCRIPT_VERSION="0.1.0"
+PROJECT_URL="https://github.com/glonlas/Stable-Diffusion-MacOS-Silicon-M1-Install"
+
+# -- Terminal color settings ----------------------------------------------------------------------
+TITLE="\033[1m\033[36m"
+ITEM="\033[0\033[34m"
+ALERT="\033[0\033[31m"
+WARNING="\033[0\033[33m"
+SUCCESS="\033[1m\033[32m"
+RESET="\033[0m\033[39m"
+
+# -- FUNCTIONS -----------------------------------------------------------------------------------
+STABLE_DIFFUSION_IS_INSTALLED=1
+
+function check_OS() {
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        if [[ $(uname -m) != 'arm64' ]]; then
+            echo -e "${ALERT}Apple CPU not supported${RESET}"
+            echo "We are sorry, but this script supports only Apple Silicon CPU (M1, M1Pro, ...)"
+            exit 1
+        fi
+    else
+        echo -e "${ALERT}OS not supported${RESET}"
+        echo "We are sorry, but this script supports only Apple Silicon with MacOS 12.4."
+        exit 1
+    fi
+}
+
+function check_install() {
+    if ! check_conda_env $CONDA_ENV
+    then
+        STABLE_DIFFUSION_IS_INSTALLED=0
+    fi 
+
+    if [ ! -d $LDM_PATH ]
+    then
+        STABLE_DIFFUSION_IS_INSTALLED=0
+    fi   
+}
+
+function install_dependencies() {
+    # Check if Brew is missing, then install it
+    if ! command -v brew &> /dev/null
+    then
+        echo -e "${ITEM}- Install Brew${RESET}"
+        /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    fi
+
+    # Check if Unzip is missing, then install it
+    if ! command -v unzip &> /dev/null
+    then
+        echo -e "${ITEM}- Install unzip${RESET}"
+        brew install -f unzip &> /dev/null 
+    fi
+    
+    # Check if Wget is missing, then install it
+    if ! command -v wget &> /dev/null
+    then
+        echo -e "${ITEM}- Install wget${RESET}"
+        brew install -f wget &> /dev/null 
+    fi
+
+    # Check if Conda is missing, then install it
+    if ! command -v conda &> /dev/null
+    then
+        echo -e "${ITEM}- Install Miniconda${RESET}"
+        brew install -f --cask miniconda &> /dev/null 
+    fi
+}
+
+function install_stable_diffusion() {
+    LSTEIN_ARCHIVE="$LSTEIN_FOLDER_NAME.zip"
+    mkdir $SD_PATH
+    cd $SD_PATH
+
+    echo -e "${ITEM}- Download LSTEIN Project${RESET}"
+    wget -q --show-progress $LSTEIN_GITHUB_URL -O $LSTEIN_ARCHIVE
+
+    echo -e "${ITEM}- Install LSTEIN Project${RESET}"
+    unzip $LSTEIN_ARCHIVE &> /dev/null
+    rm $LSTEIN_ARCHIVE &> /dev/null
+    mv stable-diffusion-main $LSTEIN_FOLDER_NAME
+
+    echo -e "${ITEM}- Download LDM Model${RESET}"
+    mkdir -p $LDM_PATH
+    wget -q --show-progress $LDM_MODEL_URL -P $LDM_PATH -O model.ckpt
+}
+
+function install_GFPGAN() {
+    activate_env
+    GFPGAN_ARCHIVE="$GFPGAN_FOLDER_NAME.zip"
+    cd $LSTEIN_PATH
+
+    echo -e "${ITEM}- Download GFPGAN Project${RESET}"
+    wget -q --show-progress $GFPGAN_GITHUB_URL -O $GFPGAN_ARCHIVE
+
+    echo -e "${ITEM}- Install GFPGAN Project${RESET}"
+    unzip $GFPGAN_ARCHIVE &> /dev/null
+    rm $GFPGAN_ARCHIVE &> /dev/null
+    mv GFPGAN-master $GFPGAN_FOLDER_NAME
+
+    echo -e "${ITEM}- Download GFPGAN Model${RESET}"
+    mkdir -p $GFPGAN_MODEL_PATH
+    wget -q --show-progress $GFPGAN_MODEL_URL -P $GFPGAN_MODEL_PATH 
+}
+
+function check_conda_env(){
+    conda env list | grep "${@}" >/dev/null 2>/dev/null
+}
+
+function activate_env() {
+    CONDA_BASE=$(conda info --base)
+    source $CONDA_BASE/etc/profile.d/conda.sh
+    conda activate $CONDA_ENV
+}
+
+function deactivate_env() {
+    conda deactivate
+}
+
+function create_env() {
+    if check_conda_env $CONDA_ENV
+    then
+        echo ""
+        echo -e "${ALERT}Conda '$CONDA_ENV' env exist already${RESET}"
+        echo ""
+        echo "What do you want to do?"
+        echo "   1) Remove current '$CONDA_ENV' env and install the new one"
+        echo "   2) Rename the current '$CONDA_ENV' to '$CONDA_ENV_BAK' and install the new one"
+        echo "   3) Skip this install and keep the current '$CONDA_ENV' env"
+        until [[ ${ENV_MENU_OPTION} =~ ^[1-3]$ ]]; do
+            read -rp "Select an option [1-3]: " ENV_MENU_OPTION
+        done
+        case "${ENV_MENU_OPTION}" in
+        1)
+            delete_env
+            install_env
+            ;;
+        2)
+            rename_env
+            install_env
+            ;;
+        esac
+    else
+        install_env
+    fi
+}
+
+function delete_env(){
+    deactivate_env
+    conda env remove -n $CONDA_ENV
+    echo -e "${SUCCESS} - Conda env $CONDA_ENV deleted${RESET}"
+}
+
+function install_env() {
+    echo -e "${ITEM} - Creating the new Conda env $CONDA_ENV${RESET}"
+    cd $LSTEIN_PATH
+    fix_environment_mac
+    # conda env create -f environment-mac.yaml
+    conda env create -f environment-mac-updated.yml
+
+    activate_env
+
+    python3 -m pip install --upgrade pip
+
+    # Fix hack: Ensure that the pip component from Github project in the environment-mac.yaml 
+    # are fully installed
+    pip install -e git+https://github.com/CompVis/taming-transformers.git@master#egg=taming-transformers
+    pip install -e git+https://github.com/openai/CLIP.git@main#egg=clip
+    pip install -e git+https://github.com/Birch-san/k-diffusion.git@mps#egg=k_diffusion
+
+    echo -e "${SUCCESS} - Conda env $CONDA_ENV installed ${RESET}"
+    deactivate_env
+}
+
+function rename_env() {
+    deactivate_env
+    echo -e "${ITEM} - Renaming the Conda env $CONDA_ENV to $CONDA_ENV_BAK ${RESET}"
+    conda rename -n $CONDA_ENV -d $CONDA_ENV_BAK
+    echo -e "${SUCCESS} - Conda env $CONDA_ENV renamed to $CONDA_ENV_BAK ${RESET}"
+}
+
+function setup_GFPGAN {
+    activate_env
+    cd $GFPGAN_PATH
+    pip install basicsr
+    pip install facexlib
+    pip install -r requirements.txt
+    python setup.py develop
+    pip install realesrgan
+    deactivate_env
+}
+
+function preload_models() {
+    activate_env
+    cd $LSTEIN_PATH
+    python3 scripts/preload_models.py
+    deactivate_env
+}
+
+function congratulation_msg(){
+    echo ""
+    echo -e "${SUCCESS}Congratulation! Your environment is installed${RESET}"
+    echo ""
+}
+
+# -- INSTALL FLOW ---------------------------------------------------------------------------------
+function install() {
+    echo ""
+    echo -e "${TITLE}1. Install missing dependencies ${RESET}"
+    install_dependencies
+
+    echo ""
+    echo -e "${TITLE}2. Download Stable-diffusion project and Model weights ${RESET}"
+    install_stable_diffusion
+    
+    echo ""
+    echo -e "${TITLE}3. Download GFPGAN project and Model weights ${RESET}"
+    install_GFPGAN
+
+    echo ""
+    echo -e "${TITLE}4. Create Conda Env '$CONDA_ENV' ${RESET}"
+    create_env
+
+    echo ""
+    echo -e "${TITLE}5. Setup GFPGAN ${RESET}"
+    setup_GFPGAN
+
+    echo ""
+    echo -e "${TITLE}6. Preload models ${RESET}"
+    preload_models
+
+    congratulation_msg
+}
+
+function uninstall() {
+    echo ""
+    echo -e "${ALERT}Uninstalling Stable Diffusion and Conda Env.${RESET}"
+
+    read -p "Do you want to remove $SD_PATH? [y/N]: " RM_SD_FOLDER
+    RM_SD_FOLDER=${RM_SD_FOLDER:-"n"}
+    if [[ $RM_SD_FOLDER == 'y' || $RM_SD_FOLDER == 'Y' ]]; then
+        rm -rf $SD_PATH
+        echo -e "${ITEM} - $SD_PATH deleted${RESET}"
+    fi
+
+    read -p "Do you want to remove Conda env '$CONDA_ENV'? [y/N]: " RM_CONDA_ENV
+    RM_CONDA_ENV=${RM_CONDA_ENV:-"n"}
+    if [[ $RM_CONDA_ENV == 'y' || $RM_CONDA_ENV == 'Y' ]]
+    then
+        deactivate_env &> /dev/null
+        delete_env
+    fi
+
+    echo ""
+    echo ""
+}
+
+function run_in_browser() {
+    echo -e "${ITEM}Starting Stable Diffusion Web UI${RESET}"
+    cd $LSTEIN_PATH
+    activate_env
+    open http://localhost:9090/
+    echo "Reload your browser page once the command below will be showing 'Started Stable Diffusion dream server!'"
+    python3 scripts/dream.py --web
+    
+}
+
+function run_in_terminal() {
+    echo -e "${ITEM}Starting Stable Diffusion in this terminal${RESET}"
+    cd $LSTEIN_PATH
+    activate_env
+    python3 ./scripts/dream.py
+}
+
+# -- Environment fix ------------------------------------------------------------------------------
+# TODO Remove it once https://github.com/lstein/stable-diffusion/pull/301/files is merged
+function fix_environment_mac() {
+    echo "name: ldm
+channels:
+  - pytorch-nightly
+  - conda-forge
+dependencies:
+  - python==3.10.5
+  - pip==22.2.2
+ 
+  # pytorch-nightly, left unpinned
+  - pytorch
+  - torchvision
+  - albumentations==1.2.1
+  - coloredlogs==15.0.1
+  - einops==0.4.1
+  - grpcio==1.46.4
+  - humanfriendly==10.0
+  - imageio==2.21.2
+  - imageio-ffmpeg==0.4.7
+  - imgaug==0.4.0
+  - kornia==0.6.7
+  - mpmath==1.2.1
+  - nomkl
+  - numpy==1.23.2
+  - omegaconf==2.1.1
+  - onnx==1.12.0
+  - onnxruntime==1.12.1
+  - opencv==4.6.0
+  - pudb==2022.1
+  - pytorch-lightning==1.6.5
+  - scipy==1.9.1
+  - streamlit==1.12.2
+  - sympy==1.10.1
+  - tensorboard==2.9.0
+  - torchmetrics==0.9.3
+  - pip:
+    - invisible-watermark
+    - test-tube
+    - transformers
+    - torch-fidelity
+    - -e git+https://github.com/CompVis/taming-transformers.git@master#egg=taming-transformers
+    - -e git+https://github.com/openai/CLIP.git@main#egg=clip
+    - -e git+https://github.com/Birch-san/k-diffusion.git@mps#egg=k_diffusion
+    - -e .
+variables:
+  PYTORCH_ENABLE_MPS_FALLBACK: 1" > $LSTEIN_PATH/environment-mac-updated.yml
+}
+
+# -- MAIN -----------------------------------------------------------------------------------------
+function main() {
+    echo ""
+    echo ""
+    echo "+-----------------------------------------+"
+    echo "|                                         |"
+    echo -e "|${TITLE}     Stable Diffusion Apple Silicon      ${RESET}|"
+    echo -e "|${TITLE}             Install script              ${RESET}|"
+    echo "|                                         |"
+    echo "+-----------------------------------------+"
+    echo "Script Version: $SCRIPT_VERSION"
+    echo "Source of the script: $PROJECT_URL"
+
+    # Check we are on the right system before to start
+    check_OS
+
+    # Check if everything is install before to start
+    check_install
+    if [[ $STABLE_DIFFUSION_IS_INSTALLED == 0 ]]
+    then
+        echo ""
+        echo -e "${ALERT}Stable Diffusion is not installed${RESET}"
+        read -p "Do you want to install Stable Diffusion? [Y/n]: " INSTALL_SD
+        INSTALL_SD=${INSTALL_SD:-"y"}
+        if [[ $INSTALL_SD == 'y' || $INSTALL_SD == 'Y' ]]; then
+            echo -e "${ITEM}Starting installation${RESET}"
+            install
+        fi
+    fi
+
+    echo ""
+    echo "What do you want to do?"
+    echo "   1) Install Stable Diffusion"
+    echo "   2) Run Stable Diffusion in Browser"
+    echo "   3) Run Stable Diffusion in Terminal"
+    echo "   4) Uninstall Stable Diffusion"
+    echo "   5) Exit"
+
+    until [[ ${MENU_OPTION} =~ ^[1-5]$ ]]; do
+        read -rp "Select an option [1-5]: " MENU_OPTION
+    done
+    case "${MENU_OPTION}" in
+    1)
+        install
+        ;;
+    2)
+        run_in_browser
+        ;;
+    3)
+        run_in_terminal
+        ;;
+    4)
+        uninstall
+        ;;
+    5)
+        deactivate_env &> /dev/null 
+        exit 1
+        ;;
+    esac
+}
+
+main
