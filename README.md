@@ -5,8 +5,22 @@ This script will help you to install Stable Diffusion on your Mac. It takes care
 ## Get Started
 Paste the following command in your MacOS terminal.
 ```bash
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/glonlas/Stable-Diffusion-MacOS-Silicon-M1-Install/install-stable-diffusion-apple-silicon-m1.sh)"
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/glonlas/Stable-Diffusion-Apple-Silicon-M1-Install/main/install-stable-diffusion-apple-silicon.sh)"
 ```
+
+or 
+
+```bash
+curl https://raw.githubusercontent.com/glonlas/Stable-Diffusion-Apple-Silicon-M1-Install/main/install-stable-diffusion-apple-silicon.sh -o install-stable-diffusion-apple-silicon.sh
+chmod +x install-stable-diffusion-apple-silicon.sh
+./install-stable-diffusion-apple-silicon.sh
+```
+
+**Script detecting missing installation**
+![Stable Diffusion Install on MacOS](https://raw.githubusercontent.com/glonlas/Stable-Diffusion-Apple-Silicon-M1-Install/main/docs/assets/install-screenshot.png)
+
+**Script menu**
+![Stable Diffusion Install on MacOS](https://raw.githubusercontent.com/glonlas/Stable-Diffusion-Apple-Silicon-M1-Install/main/docs/assets/menu-screenshot.png)
 
 ## Features:
 **Automatic installs**

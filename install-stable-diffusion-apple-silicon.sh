@@ -29,7 +29,7 @@ CONDA_ENV_BAK=$CONDA_ENV"_bak"
 
 # -- SCRIPT VERSION -------------------------------------------------------------------------------
 SCRIPT_VERSION="0.1.0"
-PROJECT_URL="https://github.com/glonlas/Stable-Diffusion-MacOS-Silicon-M1-Install"
+PROJECT_URL="https://github.com/glonlas/Stable-Diffusion-Apple-Silicon-M1-Install"
 
 # -- Terminal color settings ----------------------------------------------------------------------
 TITLE="\033[1m\033[36m"
@@ -113,7 +113,8 @@ function install_stable_diffusion() {
 
     echo -e "${ITEM}- Download LDM Model${RESET}"
     mkdir -p $LDM_PATH
-    wget -q --show-progress $LDM_MODEL_URL -P $LDM_PATH -O model.ckpt
+    cd $LDM_PATH
+    wget -q --show-progress $LDM_MODEL_URL -O model.ckpt
 }
 
 function install_GFPGAN() {
