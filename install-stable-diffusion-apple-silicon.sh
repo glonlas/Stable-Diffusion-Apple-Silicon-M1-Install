@@ -8,6 +8,7 @@ LSTEIN_GITHUB_URL="https://github.com/lstein/stable-diffusion/archive/refs/heads
 LDM_MODEL_URL="https://www.googleapis.com/storage/v1/b/aai-blog-files/o/sd-v1-4.ckpt?alt=media"
 GFPGAN_GITHUB_URL="https://github.com/TencentARC/GFPGAN/archive/refs/heads/master.zip"
 GFPGAN_MODEL_URL="https://github.com/TencentARC/GFPGAN/releases/download/v1.3.0/GFPGANv1.3.pth"
+REALESRGAN_GITHUB_URL="https://github.com/xinntao/Real-ESRGAN/releases/download/v0.2.5.0/realesrgan-ncnn-vulkan-20220424-macos.zip"
 
 # 2. Path where projects will be installed
 # Per default:
@@ -24,11 +25,14 @@ GFPGAN_FOLDER_NAME="GFPGAN"
 GFPGAN_PATH="$LSTEIN_PATH/$GFPGAN_FOLDER_NAME"
 GFPGAN_MODEL_PATH="$GFPGAN_PATH/experiments/pretrained_models"
 
+# Real ESRGAN will be in ~/stable-diffusion/realesrgan
+REALESRGAN_PATH="$SD_PATH/realesrgan"
+
 CONDA_ENV="ldm"
 CONDA_ENV_BAK=$CONDA_ENV"_bak"
 
 # -- SCRIPT VERSION -------------------------------------------------------------------------------
-SCRIPT_VERSION="0.1.0"
+SCRIPT_VERSION="0.1.1"
 PROJECT_URL="https://github.com/glonlas/Stable-Diffusion-Apple-Silicon-M1-Install"
 
 # -- Terminal color settings ----------------------------------------------------------------------
@@ -133,6 +137,32 @@ function install_GFPGAN() {
     echo -e "${ITEM}- Download GFPGAN Model${RESET}"
     mkdir -p $GFPGAN_MODEL_PATH
     wget -q --show-progress $GFPGAN_MODEL_URL -P $GFPGAN_MODEL_PATH 
+}
+
+function install_Real_ESRGAN_upscaler() {
+    REALESRGAN_ARCHIVE="realesrgan.zip"
+    mkdir $REALESRGAN_PATH
+    cd $REALESRGAN_PATH
+
+    echo -e "${ITEM}- Download Real-ESRGAN Project${RESET}"
+    wget -q --show-progress $REALESRGAN_GITHUB_URL -O $REALESRGAN_ARCHIVE
+    unzip $REALESRGAN_ARCHIVE &> /dev/null
+    rm $REALESRGAN_ARCHIVE &> /dev/null
+    chmod u+x $REALESRGAN_PATH/realesrgan-ncnn-vulkan
+    echo -e "${SUCCESS}- Real-ESRGAN is installed in $REALESRGAN_PATH ${RESET}"
+    echo -e "${WARNING}Because MacOS cannot verify the developer of “realesrgan-ncnn-vulkan”. MacOS will ask you if you want to trust it the first time your will use it.${RESET}"
+    echo "If you do not want this tool on your system, feel free to delete the folder $REALESRGAN_PATH"
+}
+
+function check_Real_ESRGAN() {
+    # Check if Brew is missing, then install it
+    if ! command -v $REALESRGAN_PATH/realesrgan-ncnn-vulkan &> /dev/null
+    then
+        echo -e "${ALERT}Real_ESRGAN upscaler not found${RESET}"
+        echo ""
+        echo -e "${TITLE}Install Real_ESRGAN upscaler${RESET}"
+        install_Real_ESRGAN_upscaler
+    fi
 }
 
 function check_conda_env(){
@@ -287,6 +317,7 @@ function uninstall() {
     echo ""
 }
 
+# -- Script Run functions ------------------------------------------------------------------------------
 function run_in_browser() {
     echo -e "${ITEM}Starting Stable Diffusion Web UI${RESET}"
     cd $LSTEIN_PATH
@@ -302,6 +333,37 @@ function run_in_terminal() {
     cd $LSTEIN_PATH
     activate_env
     python3 ./scripts/dream.py
+}
+
+function upscale_picture() {
+    # Check if Real ESRGAN is installed
+    check_Real_ESRGAN
+
+    UPSCALED_IMG_PATH=$LSTEIN_PATH/outputs
+
+    echo ""
+    echo -e "${TITLE}Upscale a picture with Real-ESRGAN upscaler${RESET}"
+    read -p "Path to the picture to upscale: " INPUT_FILE_PATH
+    
+    echo ""
+    read -p "Where to save the picture? [Default: $UPSCALED_IMG_PATH]: " DEST_PATH
+    DEST_PATH=${FILEPATH:-${UPSCALED_IMG_PATH}}
+    DEST_FILE_NAME="HD_$(basename $INPUT_FILE_PATH)"
+    DEST_FILE=$DEST_PATH/$DEST_FILE_NAME
+
+    echo ""
+    echo -e "Upscaler model available: ${ITEM}realesr-animevideov3${RESET} | ${ITEM}realesrgan-x4plus${RESET} | ${ITEM}realesrgan-x4plus-anime${RESET} | ${ITEM}realesrnet-x4plus${RESET}"
+    read -p "Upscaler model to use [default: realesrgan-x4plus]: " UPSCALER_MODEL
+    UPSCALER_MODEL=${UPSCALER_MODEL:-"realesrgan-x4plus"}
+   
+    echo ""
+    echo -e "${ITEM}Start upscaling${RESET}"
+    # To work you need to be in the folder first then execute it
+    # Issue: https://github.com/xinntao/Real-ESRGAN/issues/379
+    cd $REALESRGAN_PATH
+    ./realesrgan-ncnn-vulkan -i $INPUT_FILE_PATH -o $DEST_FILE -n $UPSCALER_MODEL
+
+    echo -e "${SUCCESS}Picture successfully upscaled in${RESET} $DEST_FILE"
 }
 
 # -- Environment fix ------------------------------------------------------------------------------
@@ -389,11 +451,12 @@ function main() {
     echo "   1) Install Stable Diffusion"
     echo "   2) Run Stable Diffusion in Browser"
     echo "   3) Run Stable Diffusion in Terminal"
-    echo "   4) Uninstall Stable Diffusion"
-    echo "   5) Exit"
+    echo "   4) Upscale a picture with Real-ESRGAN upscaler"
+    echo "   5) Uninstall Stable Diffusion"
+    echo "   6) Exit"
 
-    until [[ ${MENU_OPTION} =~ ^[1-5]$ ]]; do
-        read -rp "Select an option [1-5]: " MENU_OPTION
+    until [[ ${MENU_OPTION} =~ ^[1-6]$ ]]; do
+        read -rp "Select an option [1-6]: " MENU_OPTION
     done
     case "${MENU_OPTION}" in
     1)
@@ -406,9 +469,12 @@ function main() {
         run_in_terminal
         ;;
     4)
-        uninstall
+        upscale_picture
         ;;
     5)
+        uninstall
+        ;;
+    6)
         deactivate_env &> /dev/null 
         exit 1
         ;;
