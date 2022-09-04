@@ -1,8 +1,9 @@
 # Stable Diffusion Installation script for Apple Silicon CPU (M1, M1Pro, M2)
 
-This script will help you to install Stable Diffusion on your Mac. It takes care of installing all dependencies for you.
+This script will help you to install Stable Diffusion on your Mac. It takes care of installing all dependencies for you and provides a menu to launch a Web UI, run in your terminal, or Upscale photos to High Definition format.
 
-## Get Started
+## Get Started: How to install Stable Diffusion on Apple M1 with GPU support
+
 Paste the following command in your MacOS terminal.
 ```bash
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/glonlas/Stable-Diffusion-Apple-Silicon-M1-Install/main/install-stable-diffusion-apple-silicon.sh)"
@@ -12,6 +13,15 @@ or
 
 ```bash
 curl https://raw.githubusercontent.com/glonlas/Stable-Diffusion-Apple-Silicon-M1-Install/main/install-stable-diffusion-apple-silicon.sh -o install-stable-diffusion-apple-silicon.sh
+chmod +x install-stable-diffusion-apple-silicon.sh
+./install-stable-diffusion-apple-silicon.sh
+```
+
+or 
+
+```bash
+git clone git@github.com:glonlas/Stable-Diffusion-Apple-Silicon-M1-Install.git
+cd Stable-Diffusion-Apple-Silicon-M1-Install
 chmod +x install-stable-diffusion-apple-silicon.sh
 ./install-stable-diffusion-apple-silicon.sh
 ```
