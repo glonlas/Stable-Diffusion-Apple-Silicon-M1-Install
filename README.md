@@ -16,11 +16,14 @@ chmod +x install-stable-diffusion-apple-silicon.sh
 ./install-stable-diffusion-apple-silicon.sh
 ```
 
-**Script detecting missing installation**
-![Stable Diffusion Install on MacOS](https://raw.githubusercontent.com/glonlas/Stable-Diffusion-Apple-Silicon-M1-Install/main/docs/assets/install-screenshot.png)
-
 **Script menu**
 ![Stable Diffusion Install on MacOS](https://raw.githubusercontent.com/glonlas/Stable-Diffusion-Apple-Silicon-M1-Install/main/docs/assets/menu-screenshot.png)
+
+**Web UI provided by Lstein Stable-Diffusion project**
+![Stable Diffusion Web UI](https://raw.githubusercontent.com/glonlas/Stable-Diffusion-Apple-Silicon-M1-Install/main/docs/assets/web-ui.png)
+
+**Script detecting missing installation**
+![Stable Diffusion Install on MacOS](https://raw.githubusercontent.com/glonlas/Stable-Diffusion-Apple-Silicon-M1-Install/main/docs/assets/install-screenshot.png)
 
 ## Features:
 **Automatic installs**
@@ -28,16 +31,19 @@ chmod +x install-stable-diffusion-apple-silicon.sh
 - [x] Install Stable Diffusion project ([from Lstein Github](https://github.com/lstein/stable-diffusion))
 - [x] Install Stable Diffusion 1.4 Model
 - [x] Install GFPGAN ([from TencentARC Github](https://github.com/TencentARC/GFPGAN))
+- [x] Install Real-ESRGAN upscaler ([from Xinntao Github](https://github.com/xinntao/Real-ESRGAN/))
 
 **Stable Diffusion features**
 - [x] Run Stable Diffusion in Terminal mode
 - [x] Run Stable Diffusion in a Web UI
+- [x] On-demand picture upscaling
 - [x] Uninstall Stable Diffusion
 
 ## Credits
 - [Lstein](https://github.com/lstein) for the Apple Silicon compatible Stable Diffusion
 - [TencentARC](https://github.com/TencentARC) for GFPGAN
 - Any-Winter-4079 from Reddit [for the Apple Silicon tutorial](https://www.reddit.com/r/StableDiffusion/comments/x3yf9i/stable_diffusion_and_m1_chips_chapter_2/)
+- [Xinntao](https://github.com/xinntao) for Real-ESRGAN
 
 ## FAQ
 ### 1. Can I copy this script and update it?
