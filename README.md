@@ -5,26 +5,27 @@ This script will help you to install Stable Diffusion on your Mac. It takes care
 ## Get Started: How to install Stable Diffusion on Apple M1 with GPU support
 
 Paste the following command in your MacOS terminal.
-```bash
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/glonlas/Stable-Diffusion-Apple-Silicon-M1-Install/main/install-stable-diffusion-apple-silicon.sh)"
-```
 
-or 
-
-```bash
-curl https://raw.githubusercontent.com/glonlas/Stable-Diffusion-Apple-Silicon-M1-Install/main/install-stable-diffusion-apple-silicon.sh -o install-stable-diffusion-apple-silicon.sh
-chmod +x install-stable-diffusion-apple-silicon.sh
-./install-stable-diffusion-apple-silicon.sh
-```
-
-or 
-
+Option 1: Clone the project.
 ```bash
 git clone git@github.com:glonlas/Stable-Diffusion-Apple-Silicon-M1-Install.git
+
 cd Stable-Diffusion-Apple-Silicon-M1-Install
-chmod +x install-stable-diffusion-apple-silicon.sh
+
 ./install-stable-diffusion-apple-silicon.sh
 ```
+
+Option 2: Download offline copy of this repo
+```bash
+curl https://raw.githubusercontent.com/glonlas/Stable-Diffusion-Apple-Silicon-M1-Install/main/install-stable-diffusion-apple-silicon.sh -o install-stable-diffusion-apple-silicon.sh
+
+./install-stable-diffusion-apple-silicon.sh
+```
+
+## How to use it?
+To use it simply go to the folder where you put this project and run `./install-stable-diffusion-apple-silicon.sh`.
+
+The script will automatically detect if all the dependencies are installed, then will display the menu to start generating or upscaling images.
 
 **Script menu**
 ![Stable Diffusion Install on MacOS](https://raw.githubusercontent.com/glonlas/Stable-Diffusion-Apple-Silicon-M1-Install/main/docs/assets/menu-screenshot.png)
@@ -33,6 +34,7 @@ chmod +x install-stable-diffusion-apple-silicon.sh
 ![Stable Diffusion Web UI](https://raw.githubusercontent.com/glonlas/Stable-Diffusion-Apple-Silicon-M1-Install/main/docs/assets/web-ui.png)
 
 **Script detecting missing installation**
+Screen you will see at first launch.
 ![Stable Diffusion Install on MacOS](https://raw.githubusercontent.com/glonlas/Stable-Diffusion-Apple-Silicon-M1-Install/main/docs/assets/install-screenshot.png)
 
 ## Features:
