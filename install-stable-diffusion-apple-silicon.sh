@@ -361,10 +361,24 @@ function upscale_picture() {
 # -- Environment fix ------------------------------------------------------------------------------
 
 function fix_environment_mac() {
+    echo -e "${TITLE}Patching Apple Silicon support${RESET}"
+
     cd $LSTEIN_PATH
     # TODO Remove it once https://github.com/lstein/stable-diffusion/pull/301/files is merged in main
+    echo -e "${ITEM}Fix environment-mac-updated.yml${RESET}"
     PATCH_ENV="https://raw.githubusercontent.com/glonlas/Stable-Diffusion-Apple-Silicon-M1-Install/main/patches/environment-mac-updated.yml"
     wget -q --show-progress $PATCH_ENV
+
+    # Patch GPFGAN upscaling
+    echo -e "${ITEM}Fix GPFGAN upscaling${RESET}"
+    PATCH_ENV="https://raw.githubusercontent.com/glonlas/Stable-Diffusion-Apple-Silicon-M1-Install/main/patches/gfpgan_tools.py.patch"
+    wget -q --show-progress $PATCH_ENV
+    git apply gfpgan_tools.py.patch
+
+    PATCH_ENV="https://raw.githubusercontent.com/glonlas/Stable-Diffusion-Apple-Silicon-M1-Install/main/patches/simplet2i.py.patch"
+    wget -q --show-progress $PATCH_ENV
+    git apply simplet2i.py.patch
+    
 }
 
 # -- MAIN -----------------------------------------------------------------------------------------

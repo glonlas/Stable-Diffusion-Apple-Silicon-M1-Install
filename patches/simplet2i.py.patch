@@ -1,0 +1,66 @@
+diff --git a/ldm/simplet2i.py b/ldm/simplet2i.py
+index 3b4cf6c..0a81590 100644
+--- a/ldm/simplet2i.py
++++ b/ldm/simplet2i.py
+@@ -91,6 +91,7 @@ Note that the old txt2img() and img2img() calls are deprecated but will
+ still work.
+ """
+ 
++OUTPUT_PATH=os.path.join('outputs','img-samples')
+ 
+ class T2I:
+     """T2I class
+@@ -193,11 +194,11 @@ class T2I:
+         return outputs
+ 
+     def txt2img(self, prompt, **kwargs):
+-        outdir = kwargs.pop('outdir', 'outputs/img-samples')
++        outdir = kwargs.pop('outdir', OUTPUT_PATH)
+         return self.prompt2png(prompt, outdir, **kwargs)
+ 
+     def img2img(self, prompt, **kwargs):
+-        outdir = kwargs.pop('outdir', 'outputs/img-samples')
++        outdir = kwargs.pop('outdir', OUTPUT_PATH)
+         assert (
+             'init_img' in kwargs
+         ), 'call to img2img() must include the init_img argument'
+@@ -390,17 +391,17 @@ class T2I:
+                         image, seed = result
+                         try:
+                             if upscale is not None:
+-                                from ldm.gfpgan.gfpgan_tools import (
+-                                    real_esrgan_upscale,
+-                                )
++                                from ldm.gfpgan.gfpgan_tools import real_esrgan_upscale
++                                
+                                 if len(upscale) < 2:
+-                                    upscale.append(0.75)
++                                        upscale.append(0.75)
+                                 image = real_esrgan_upscale(
+                                     image,
+                                     upscale[1],
+                                     int(upscale[0]),
+                                     prompt,
+                                     seed,
++                                    OUTPUT_PATH
+                                 )
+                             if gfpgan_strength > 0:
+                                 from ldm.gfpgan.gfpgan_tools import _run_gfpgan
+@@ -434,10 +435,13 @@ class T2I:
+         print(
+             f'>>   {len(results)} image(s) generated in', '%4.2fs' % (toc - tic)
+         )
+-        print(
+-            f'>>   Max VRAM used for this generation:',
+-            '%4.2fG' % (torch.cuda.max_memory_allocated() / 1e9),
+-        )
++        if self.device.type == 'mps':
++            pass
++        else:
++            print(
++                f'>>   Max VRAM used for this generation:',
++                '%4.2fG' % (torch.cuda.max_memory_allocated() / 1e9),
++            )
+ 
+         if self.session_peakmem:
+             self.session_peakmem = max(
