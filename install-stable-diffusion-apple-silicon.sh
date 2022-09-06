@@ -22,7 +22,7 @@ LDM_PATH="$LSTEIN_PATH/models/ldm/stable-diffusion-v1"
 
 # GFPGAN will be in ~/stable-diffusion/lstein/GFPGAN
 GFPGAN_FOLDER_NAME="GFPGAN"
-GFPGAN_PATH="$LSTEIN_PATH/$GFPGAN_FOLDER_NAME"
+GFPGAN_PATH="$SD_PATH/$GFPGAN_FOLDER_NAME"
 GFPGAN_MODEL_PATH="$GFPGAN_PATH/experiments/pretrained_models"
 
 # Real ESRGAN will be in ~/stable-diffusion/realesrgan
@@ -32,7 +32,7 @@ CONDA_ENV="ldm"
 CONDA_ENV_BAK=$CONDA_ENV"_bak"
 
 # -- SCRIPT VERSION -------------------------------------------------------------------------------
-SCRIPT_VERSION="0.1.1"
+SCRIPT_VERSION="0.1.2"
 PROJECT_URL="https://github.com/glonlas/Stable-Diffusion-Apple-Silicon-M1-Install"
 
 # -- Terminal color settings ----------------------------------------------------------------------
@@ -249,11 +249,7 @@ function setup_GFPGAN {
     pip install -r requirements.txt
     python setup.py develop
     pip install realesrgan
-    deactivate_env
-}
 
-function preload_models() {
-    activate_env
     cd $LSTEIN_PATH
     python3 scripts/preload_models.py
     deactivate_env
@@ -286,10 +282,6 @@ function install() {
     echo ""
     echo -e "${TITLE}5. Setup GFPGAN ${RESET}"
     setup_GFPGAN
-
-    echo ""
-    echo -e "${TITLE}6. Preload models ${RESET}"
-    preload_models
 
     congratulation_msg
 }
@@ -348,26 +340,26 @@ function upscale_picture() {
     echo ""
     read -p "Where to save the picture? [Default: $UPSCALED_IMG_PATH]: " DEST_PATH
     DEST_PATH=${FILEPATH:-${UPSCALED_IMG_PATH}}
-    DEST_FILE_NAME="HD_$(basename $INPUT_FILE_PATH)"
+    DEST_FILE_NAME="HD_$(basename "$INPUT_FILE_PATH")"
     DEST_FILE=$DEST_PATH/$DEST_FILE_NAME
 
     echo ""
     echo -e "Upscaler model available: ${ITEM}realesr-animevideov3${RESET} | ${ITEM}realesrgan-x4plus${RESET} | ${ITEM}realesrgan-x4plus-anime${RESET} | ${ITEM}realesrnet-x4plus${RESET}"
     read -p "Upscaler model to use [default: realesrgan-x4plus]: " UPSCALER_MODEL
     UPSCALER_MODEL=${UPSCALER_MODEL:-"realesrgan-x4plus"}
-   
+
     echo ""
     echo -e "${ITEM}Start upscaling${RESET}"
     # To work you need to be in the folder first then execute it
     # Issue: https://github.com/xinntao/Real-ESRGAN/issues/379
     cd $REALESRGAN_PATH
-    ./realesrgan-ncnn-vulkan -i $INPUT_FILE_PATH -o $DEST_FILE -n $UPSCALER_MODEL
+    ./realesrgan-ncnn-vulkan -i "$INPUT_FILE_PATH" -o "$DEST_FILE" -n "$UPSCALER_MODEL"
 
     echo -e "${SUCCESS}Picture successfully upscaled in${RESET} $DEST_FILE"
 }
 
 # -- Environment fix ------------------------------------------------------------------------------
-# TODO Remove it once https://github.com/lstein/stable-diffusion/pull/301/files is merged
+# TODO Remove it once https://github.com/lstein/stable-diffusion/pull/301/files is merged in main
 function fix_environment_mac() {
     echo "name: ldm
 channels:
