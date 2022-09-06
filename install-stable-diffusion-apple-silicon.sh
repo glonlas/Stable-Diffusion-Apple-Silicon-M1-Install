@@ -359,53 +359,12 @@ function upscale_picture() {
 }
 
 # -- Environment fix ------------------------------------------------------------------------------
-# TODO Remove it once https://github.com/lstein/stable-diffusion/pull/301/files is merged in main
+
 function fix_environment_mac() {
-    echo "name: ldm
-channels:
-  - pytorch-nightly
-  - conda-forge
-dependencies:
-  - python==3.10.5
-  - pip==22.2.2
- 
-  # pytorch-nightly, left unpinned
-  - pytorch
-  - torchvision
-  - albumentations==1.2.1
-  - coloredlogs==15.0.1
-  - einops==0.4.1
-  - grpcio==1.46.4
-  - humanfriendly==10.0
-  - imageio==2.21.2
-  - imageio-ffmpeg==0.4.7
-  - imgaug==0.4.0
-  - kornia==0.6.7
-  - mpmath==1.2.1
-  - nomkl
-  - numpy==1.23.2
-  - omegaconf==2.1.1
-  - onnx==1.12.0
-  - onnxruntime==1.12.1
-  - opencv==4.6.0
-  - pudb==2022.1
-  - pytorch-lightning==1.6.5
-  - scipy==1.9.1
-  - streamlit==1.12.2
-  - sympy==1.10.1
-  - tensorboard==2.9.0
-  - torchmetrics==0.9.3
-  - pip:
-    - invisible-watermark
-    - test-tube
-    - transformers
-    - torch-fidelity
-    - -e git+https://github.com/CompVis/taming-transformers.git@master#egg=taming-transformers
-    - -e git+https://github.com/openai/CLIP.git@main#egg=clip
-    - -e git+https://github.com/Birch-san/k-diffusion.git@mps#egg=k_diffusion
-    - -e .
-variables:
-  PYTORCH_ENABLE_MPS_FALLBACK: 1" > $LSTEIN_PATH/environment-mac-updated.yml
+    cd $LSTEIN_PATH
+    # TODO Remove it once https://github.com/lstein/stable-diffusion/pull/301/files is merged in main
+    PATCH_ENV="https://raw.githubusercontent.com/glonlas/Stable-Diffusion-Apple-Silicon-M1-Install/main/patches/environment-mac-updated.yml"
+    wget -q --show-progress $PATCH_ENV
 }
 
 # -- MAIN -----------------------------------------------------------------------------------------
