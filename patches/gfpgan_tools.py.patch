@@ -1,6 +1,6 @@
-diff --git a/ldm/gfpgan/gfpgan_tools.py.bak b/ldm/gfpgan/gfpgan_tools.py
+diff --git a/ldm/gfpgan/gfpgan_tools.py b/ldm/gfpgan/gfpgan_tools.py
 index 825d824..dd54ba9 100644
---- a/ldm/gfpgan/gfpgan_tools.py.bak
+--- a/ldm/gfpgan/gfpgan_tools.py
 +++ b/ldm/gfpgan/gfpgan_tools.py
 @@ -6,6 +6,8 @@ import numpy as np
  
