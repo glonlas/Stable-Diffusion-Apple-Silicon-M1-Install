@@ -1,6 +1,6 @@
-diff --git a/ldm/gfpgan/gfpgan_tools.py b/ldm/gfpgan/gfpgan_tools.py
-index 825d824..bca1aa8 100644
---- a/ldm/gfpgan/gfpgan_tools.py
+diff --git a/ldm/gfpgan/gfpgan_tools.py.bak b/ldm/gfpgan/gfpgan_tools.py
+index 825d824..dd54ba9 100644
+--- a/ldm/gfpgan/gfpgan_tools.py.bak
 +++ b/ldm/gfpgan/gfpgan_tools.py
 @@ -6,6 +6,8 @@ import numpy as np
  
@@ -11,7 +11,7 @@ index 825d824..bca1aa8 100644
  
  arg_parser = create_argv_parser()
  opt = arg_parser.parse_args()
-@@ -127,41 +129,73 @@ def _load_gfpgan_bg_upsampler(bg_upsampler, upsampler_scale, bg_tile=400):
+@@ -127,41 +129,78 @@ def _load_gfpgan_bg_upsampler(bg_upsampler, upsampler_scale, bg_tile=400):
      return bg_upsampler
  
  
@@ -40,14 +40,19 @@ index 825d824..bca1aa8 100644
 -            upsampler = _load_gfpgan_bg_upsampler(
 -                opt.gfpgan_bg_upsampler, upsampler_scale, opt.gfpgan_bg_tile
 -            )
++            cmd = [
++                './realesrgan-ncnn-vulkan',
++                '-i', str(img_path),
++                '-o', str(img_path),
++                '-s', str(upsampler_scale)
++            ]
++
++            if upsampler_scale > 2:
++                cmd.append('-n')
++                cmd.append('realesrgan-x4plus')
++
 +            subprocess.run(
-+                [
-+                    './realesrgan-ncnn-vulkan', 
-+                    '-i', str(img_path), 
-+                    '-o', str(img_path), 
-+                    '-s', str(upsampler_scale), 
-+                    '-n', 'realesrgan-x4plus'
-+                ],
++                cmd,
 +                stdout=subprocess.PIPE,
 +                cwd="../realesrgan"
 +            ).stdout.decode('utf-8')
