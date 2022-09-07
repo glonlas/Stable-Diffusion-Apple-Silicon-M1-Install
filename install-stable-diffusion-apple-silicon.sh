@@ -216,8 +216,6 @@ function delete_env(){
 function install_env() {
     echo -e "${ITEM} - Creating the new Conda env $CONDA_ENV${RESET}"
     cd $LSTEIN_PATH
-    fix_environment_mac
-    # conda env create -f environment-mac.yaml
     conda env create -f environment-mac-updated.yml
 
     activate_env
@@ -276,11 +274,15 @@ function install() {
     install_GFPGAN
 
     echo ""
-    echo -e "${TITLE}4. Create Conda Env '$CONDA_ENV' ${RESET}"
+    echo -e "${TITLE}4. Patching Apple Silicon support${RESET}"
+    fix_environment_mac
+
+    echo ""
+    echo -e "${TITLE}5. Create Conda Env '$CONDA_ENV' ${RESET}"
     create_env
 
     echo ""
-    echo -e "${TITLE}5. Setup GFPGAN ${RESET}"
+    echo -e "${TITLE}6. Setup GFPGAN ${RESET}"
     setup_GFPGAN
 
     congratulation_msg
@@ -361,8 +363,6 @@ function upscale_picture() {
 # -- Environment fix ------------------------------------------------------------------------------
 
 function fix_environment_mac() {
-    echo -e "${TITLE}Patching Apple Silicon support${RESET}"
-
     cd $LSTEIN_PATH
     # TODO Remove it once https://github.com/lstein/stable-diffusion/pull/301/files is merged in main
     echo -e "${ITEM}Fix environment-mac-updated.yml${RESET}"
