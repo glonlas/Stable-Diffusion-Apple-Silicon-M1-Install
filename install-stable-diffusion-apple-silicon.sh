@@ -15,12 +15,12 @@ REALESRGAN_GITHUB_URL="https://github.com/xinntao/Real-ESRGAN/releases/download/
 # project root folder will be in ~/stable-diffusion/
 SD_PATH="$HOME/stable-diffusion"
 
-# lstein/stable-diffusion will be in ~/stable-diffusion/lstein
-LSTEIN_FOLDER_NAME="stablediffusion"
+# lstein/stable-diffusion will be in ~/stable-diffusion/stable-diffusion
+LSTEIN_FOLDER_NAME="stable-diffusion"
 LSTEIN_PATH="$SD_PATH/$LSTEIN_FOLDER_NAME"
 LDM_PATH="$LSTEIN_PATH/models/ldm/stable-diffusion-v1"
 
-# GFPGAN will be in ~/stable-diffusion/lstein/GFPGAN
+# GFPGAN will be in ~/stable-diffusion/stable-diffusion/GFPGAN
 GFPGAN_FOLDER_NAME="GFPGAN"
 GFPGAN_PATH="$SD_PATH/$GFPGAN_FOLDER_NAME"
 GFPGAN_MODEL_PATH="$GFPGAN_PATH/experiments/pretrained_models"
