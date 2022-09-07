@@ -16,7 +16,7 @@ REALESRGAN_GITHUB_URL="https://github.com/xinntao/Real-ESRGAN/releases/download/
 SD_PATH="$HOME/stable-diffusion"
 
 # lstein/stable-diffusion will be in ~/stable-diffusion/lstein
-LSTEIN_FOLDER_NAME="stablediffusion"
+LSTEIN_FOLDER_NAME="stable-diffusion"
 LSTEIN_PATH="$SD_PATH/$LSTEIN_FOLDER_NAME"
 LDM_PATH="$LSTEIN_PATH/models/ldm/stable-diffusion-v1"
 
