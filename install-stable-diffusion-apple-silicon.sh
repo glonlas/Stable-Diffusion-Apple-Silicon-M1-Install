@@ -216,7 +216,7 @@ function delete_env(){
 function install_env() {
     echo -e "${ITEM} - Creating the new Conda env $CONDA_ENV${RESET}"
     cd $LSTEIN_PATH
-    conda env create -f environment-mac-updated.yml
+    CONDA_SUBDIR=osx-64 conda env create -f environment-mac-updated.yml
 
     activate_env
 
