@@ -4,10 +4,11 @@
 
 # -- Variables you can change ---------------------------------------------------------------------
 # 1. URL to Github project and model
-LSTEIN_GITHUB_URL="https://github.com/lstein/stable-diffusion/archive/refs/heads/main.zip"
+INVOKEAI_GITHUB_URL="https://github.com/invoke-ai/InvokeAI/archive/refs/heads/main.zip"
 LDM_MODEL_URL="https://www.googleapis.com/storage/v1/b/aai-blog-files/o/sd-v1-4.ckpt?alt=media"
 GFPGAN_GITHUB_URL="https://github.com/TencentARC/GFPGAN/archive/refs/heads/master.zip"
-GFPGAN_MODEL_URL="https://github.com/TencentARC/GFPGAN/releases/download/v1.3.0/GFPGANv1.3.pth"
+GFPGAN_MODEL_URL="https://github.com/TencentARC/GFPGAN/releases/download/v1.3.0/GFPGANv1.4.pth"
+CODEFORMER_MODEL_URL="https://github.com/sczhou/CodeFormer/releases/download/v0.1.0/codeformer.pth"
 REALESRGAN_GITHUB_URL="https://github.com/xinntao/Real-ESRGAN/releases/download/v0.2.5.0/realesrgan-ncnn-vulkan-20220424-macos.zip"
 
 # 2. Path where projects will be installed
@@ -16,14 +17,11 @@ REALESRGAN_GITHUB_URL="https://github.com/xinntao/Real-ESRGAN/releases/download/
 SD_PATH="$HOME/stable-diffusion"
 
 # lstein/stable-diffusion will be in ~/stable-diffusion/stable-diffusion
-LSTEIN_FOLDER_NAME="stable-diffusion"
-LSTEIN_PATH="$SD_PATH/$LSTEIN_FOLDER_NAME"
-LDM_PATH="$LSTEIN_PATH/models/ldm/stable-diffusion-v1"
-
-# GFPGAN will be in ~/stable-diffusion/stable-diffusion/GFPGAN
-GFPGAN_FOLDER_NAME="GFPGAN"
-GFPGAN_PATH="$SD_PATH/$GFPGAN_FOLDER_NAME"
-GFPGAN_MODEL_PATH="$GFPGAN_PATH/experiments/pretrained_models"
+INVOKEAI_FOLDER_NAME="InvokeAI"
+INVOKEAI_PATH="$SD_PATH/$INVOKEAI_FOLDER_NAME"
+LDM_PATH="$INVOKEAI_PATH/models/ldm/stable-diffusion-v1"
+GFPGAN_MODEL_PATH="$INVOKEAI_PATH/src/gfpgan/experiments/pretrained_models"
+CODEFORMER_MODEL_PATH="$INVOKEAI_PATH/ldm/dream/restoration/codeformer/weights/"
 
 # Real ESRGAN will be in ~/stable-diffusion/realesrgan
 REALESRGAN_PATH="$SD_PATH/realesrgan"
@@ -78,65 +76,63 @@ function install_dependencies() {
     then
         echo -e "${ITEM}- Install Brew${RESET}"
         /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    else
+        echo -e "${SUCCESS}- Brew already installed${RESET}"
     fi
 
     # Check if Unzip is missing, then install it
     if ! command -v unzip &> /dev/null
     then
         echo -e "${ITEM}- Install unzip${RESET}"
-        brew install -f unzip &> /dev/null 
+        brew install -f unzip &> /dev/null
+    else
+        echo -e "${SUCCESS}- unzip already installed${RESET}"
     fi
     
     # Check if Wget is missing, then install it
     if ! command -v wget &> /dev/null
     then
         echo -e "${ITEM}- Install wget${RESET}"
-        brew install -f wget &> /dev/null 
+        brew install -f wget &> /dev/null
+    else
+        echo -e "${SUCCESS}- wget already installed${RESET}"
     fi
 
     # Check if Conda is missing, then install it
     if ! command -v conda &> /dev/null
     then
         echo -e "${ITEM}- Install Miniconda${RESET}"
-        brew install -f --cask miniconda &> /dev/null 
+        brew install -f --cask miniconda &> /dev/null
+    else
+        echo -e "${SUCCESS}- Miniconda already installed${RESET}"
     fi
 }
 
 function install_stable_diffusion() {
-    LSTEIN_ARCHIVE="$LSTEIN_FOLDER_NAME.zip"
+    INVOKEAI_ARCHIVE="$INVOKEAI_FOLDER_NAME.zip"
     mkdir $SD_PATH
     cd $SD_PATH
 
-    echo -e "${ITEM}- Download LSTEIN Project${RESET}"
-    wget -q --show-progress $LSTEIN_GITHUB_URL -O $LSTEIN_ARCHIVE
+    echo -e "${ITEM}- Download InvokeAI Project${RESET}"
+    wget -q --show-progress $INVOKEAI_GITHUB_URL -O $INVOKEAI_ARCHIVE
 
-    echo -e "${ITEM}- Install LSTEIN Project${RESET}"
-    unzip $LSTEIN_ARCHIVE &> /dev/null
-    rm $LSTEIN_ARCHIVE &> /dev/null
-    mv stable-diffusion-main $LSTEIN_FOLDER_NAME
+    echo -e "${ITEM}- Install InvokeAi Project${RESET}"
+    unzip $INVOKEAI_ARCHIVE &> /dev/null
+    rm $INVOKEAI_ARCHIVE &> /dev/null
+    mv $INVOKEAI_FOLDER_NAME-main $INVOKEAI_FOLDER_NAME
 
     echo -e "${ITEM}- Download LDM Model${RESET}"
     mkdir -p $LDM_PATH
     cd $LDM_PATH
     wget -q --show-progress $LDM_MODEL_URL -O model.ckpt
-}
-
-function install_GFPGAN() {
-    activate_env
-    GFPGAN_ARCHIVE="$GFPGAN_FOLDER_NAME.zip"
-    cd $LSTEIN_PATH
-
-    echo -e "${ITEM}- Download GFPGAN Project${RESET}"
-    wget -q --show-progress $GFPGAN_GITHUB_URL -O $GFPGAN_ARCHIVE
-
-    echo -e "${ITEM}- Install GFPGAN Project${RESET}"
-    unzip $GFPGAN_ARCHIVE &> /dev/null
-    rm $GFPGAN_ARCHIVE &> /dev/null
-    mv GFPGAN-master $GFPGAN_FOLDER_NAME
 
     echo -e "${ITEM}- Download GFPGAN Model${RESET}"
     mkdir -p $GFPGAN_MODEL_PATH
     wget -q --show-progress $GFPGAN_MODEL_URL -P $GFPGAN_MODEL_PATH 
+
+    echo -e "${ITEM}- Download CodeFormer Model${RESET}"
+    mkdir -p $GFPGAN_MODEL_PATH
+    wget -q --show-progress $CODEFORMER_MODEL_URL -P $CODEFORMER_MODEL_PATH 
 }
 
 function install_Real_ESRGAN_upscaler() {
@@ -166,16 +162,21 @@ function check_Real_ESRGAN() {
 }
 
 function check_conda_env(){
-    conda env list | grep "${@}" >/dev/null 2>/dev/null
+    conda env list | grep -w "${@}" >/dev/null 2>/dev/null
+}
+
+function init_conda_env(){
+    CONDA_BASE=$(conda info --base)
+    source $CONDA_BASE/etc/profile.d/conda.sh
 }
 
 function activate_env() {
-    CONDA_BASE=$(conda info --base)
-    source $CONDA_BASE/etc/profile.d/conda.sh
+    init_conda_env
     conda activate $CONDA_ENV
 }
 
 function deactivate_env() {
+    init_conda_env
     conda deactivate
 }
 
@@ -215,8 +216,8 @@ function delete_env(){
 
 function install_env() {
     echo -e "${ITEM} - Creating the new Conda env $CONDA_ENV${RESET}"
-    cd $LSTEIN_PATH
-    CONDA_SUBDIR=osx-64 conda env create -f environment-mac-updated.yml
+    cd $INVOKEAI_PATH
+    PIP_EXISTS_ACTION=w CONDA_SUBDIR=osx-arm64 conda env create -f environment-mac.yaml
 
     activate_env
 
@@ -241,14 +242,11 @@ function rename_env() {
 
 function setup_GFPGAN {
     activate_env
-    cd $GFPGAN_PATH
+    cd $INVOKEAI_PATH
     pip install basicsr
     pip install facexlib
-    pip install -r requirements.txt
-    python setup.py develop
     pip install realesrgan
 
-    cd $LSTEIN_PATH
     python3 scripts/preload_models.py
     deactivate_env
 }
@@ -268,21 +266,13 @@ function install() {
     echo ""
     echo -e "${TITLE}2. Download Stable-diffusion project and Model weights ${RESET}"
     install_stable_diffusion
-    
-    echo ""
-    echo -e "${TITLE}3. Download GFPGAN project and Model weights ${RESET}"
-    install_GFPGAN
 
     echo ""
-    echo -e "${TITLE}4. Patching Apple Silicon support${RESET}"
-    fix_environment_mac
-
-    echo ""
-    echo -e "${TITLE}5. Create Conda Env '$CONDA_ENV' ${RESET}"
+    echo -e "${TITLE}3. Create Conda Env '$CONDA_ENV' ${RESET}"
     create_env
 
     echo ""
-    echo -e "${TITLE}6. Setup GFPGAN ${RESET}"
+    echo -e "${TITLE}4. Setup GFPGAN ${RESET}"
     setup_GFPGAN
 
     congratulation_msg
@@ -303,7 +293,6 @@ function uninstall() {
     RM_CONDA_ENV=${RM_CONDA_ENV:-"n"}
     if [[ $RM_CONDA_ENV == 'y' || $RM_CONDA_ENV == 'Y' ]]
     then
-        deactivate_env &> /dev/null
         delete_env
     fi
 
@@ -314,7 +303,7 @@ function uninstall() {
 # -- Script Run functions ------------------------------------------------------------------------------
 function run_in_browser() {
     echo -e "${ITEM}Starting Stable Diffusion Web UI${RESET}"
-    cd $LSTEIN_PATH
+    cd $INVOKEAI_PATH
     activate_env
     open http://localhost:9090/
     echo "Reload your browser page once the command below will be showing 'Started Stable Diffusion dream server!'"
@@ -324,7 +313,7 @@ function run_in_browser() {
 
 function run_in_terminal() {
     echo -e "${ITEM}Starting Stable Diffusion in this terminal${RESET}"
-    cd $LSTEIN_PATH
+    cd $INVOKEAI_PATH
     activate_env
     python3 ./scripts/dream.py
 }
@@ -333,7 +322,7 @@ function upscale_picture() {
     # Check if Real ESRGAN is installed
     check_Real_ESRGAN
 
-    UPSCALED_IMG_PATH=$LSTEIN_PATH/outputs
+    UPSCALED_IMG_PATH=$INVOKEAI_PATH/outputs
 
     echo ""
     echo -e "${TITLE}Upscale a picture with Real-ESRGAN upscaler${RESET}"
@@ -358,27 +347,6 @@ function upscale_picture() {
     ./realesrgan-ncnn-vulkan -i "$INPUT_FILE_PATH" -o "$DEST_FILE" -n "$UPSCALER_MODEL"
 
     echo -e "${SUCCESS}Picture successfully upscaled in${RESET} $DEST_FILE"
-}
-
-# -- Environment fix ------------------------------------------------------------------------------
-
-function fix_environment_mac() {
-    cd $LSTEIN_PATH
-    # TODO Remove it once https://github.com/lstein/stable-diffusion/pull/301/files is merged in main
-    echo -e "${ITEM}Fix environment-mac-updated.yml${RESET}"
-    PATCH_ENV="https://raw.githubusercontent.com/glonlas/Stable-Diffusion-Apple-Silicon-M1-Install/main/patches/environment-mac-updated.yml"
-    wget -q --show-progress $PATCH_ENV
-
-    # Patch GPFGAN upscaling
-    echo -e "${ITEM}Fix GPFGAN upscaling${RESET}"
-    PATCH_ENV="https://raw.githubusercontent.com/glonlas/Stable-Diffusion-Apple-Silicon-M1-Install/main/patches/gfpgan_tools.py.patch"
-    wget -q --show-progress $PATCH_ENV
-    git apply gfpgan_tools.py.patch
-
-    PATCH_ENV="https://raw.githubusercontent.com/glonlas/Stable-Diffusion-Apple-Silicon-M1-Install/main/patches/simplet2i.py.patch"
-    wget -q --show-progress $PATCH_ENV
-    git apply simplet2i.py.patch
-    
 }
 
 # -- MAIN -----------------------------------------------------------------------------------------
