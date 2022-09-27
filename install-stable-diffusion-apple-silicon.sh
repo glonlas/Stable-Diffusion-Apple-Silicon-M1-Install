@@ -30,7 +30,7 @@ CONDA_ENV="ldm"
 CONDA_ENV_BAK=$CONDA_ENV"_bak"
 
 # -- SCRIPT VERSION -------------------------------------------------------------------------------
-SCRIPT_VERSION="0.1.2"
+SCRIPT_VERSION="0.1.3"
 PROJECT_URL="https://github.com/glonlas/Stable-Diffusion-Apple-Silicon-M1-Install"
 
 # -- Terminal color settings ----------------------------------------------------------------------
