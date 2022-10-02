@@ -275,6 +275,10 @@ function install() {
     echo -e "${TITLE}4. Setup GFPGAN ${RESET}"
     setup_GFPGAN
 
+    echo ""
+    echo -e "${TITLE}5. Setup Real ESRGAN ${RESET}"
+    check_Real_ESRGAN
+
     congratulation_msg
 }
 
