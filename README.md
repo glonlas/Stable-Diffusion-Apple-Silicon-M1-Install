@@ -12,14 +12,14 @@ git clone git@github.com:glonlas/Stable-Diffusion-Apple-Silicon-M1-Install.git
 
 cd Stable-Diffusion-Apple-Silicon-M1-Install
 
-./install-stable-diffusion-apple-silicon.sh
+bash ./install-stable-diffusion-apple-silicon.sh
 ```
 
 Option 2: Download offline copy of this repo
 ```bash
 curl https://raw.githubusercontent.com/glonlas/Stable-Diffusion-Apple-Silicon-M1-Install/main/install-stable-diffusion-apple-silicon.sh -o install-stable-diffusion-apple-silicon.sh
 
-./install-stable-diffusion-apple-silicon.sh
+bash ./install-stable-diffusion-apple-silicon.sh
 ```
 
 ## How to use it?

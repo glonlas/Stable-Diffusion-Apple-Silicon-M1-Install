@@ -44,6 +44,19 @@ RESET="\033[0m\033[39m"
 # -- FUNCTIONS -----------------------------------------------------------------------------------
 STABLE_DIFFUSION_IS_INSTALLED=1
 
+function check_interpreter(){
+    INTERPRETER=$(ps -p $$ | tail -1 | awk '{print $4}')
+    if [[ $INTERPRETER != "/bin/bash" ]]; then
+        echo "ERROR: Wrong interpreter used"
+        echo "This script needs to be executed with bash to work."
+        echo "Instead you are using $INTERPRETER."
+        echo ""
+        echo "Execute the script with the command:"
+        echo "bash ./install-stable-diffusion-apple-silicon.sh"
+        exit 1
+    fi
+}
+
 function check_OS() {
     if [[ "$OSTYPE" == "darwin"* ]]; then
         if [[ $(uname -m) != 'arm64' ]]; then
@@ -355,6 +368,8 @@ function upscale_picture() {
 
 # -- MAIN -----------------------------------------------------------------------------------------
 function main() {
+    check_interpreter
+
     echo ""
     echo ""
     echo "+-----------------------------------------+"
